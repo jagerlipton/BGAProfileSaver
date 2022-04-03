@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">ProfileEditor</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="load_profile">Load profile</string>
+    <string name="save_eeprom">Save EEPROM</string>
+    <string name="send_json">Send JSON</string>
+    <string name="cancel">Cancel</string>
+    <string name="send_short">Send Short</string>
+
+
+    <string-array name="speed">
+        <item>9600</item>
+        <item>19200</item>
+        <item>38400</item>
+        <item>57600</item>
+        <item>115200</item>
+        <item>230400</item>
+        <item>460800</item>
+        <item>921600</item>
+    </string-array>
+</resources>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/topGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintGuide_percent="0.10" />
+
+    <TextView
+        android:id="@+id/UARTTextview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-black"
+        android:text="@string/disconnected"
+        app:layout_constraintBottom_toTopOf="@+id/topGuideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/speedSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:entries="@array/speed"
+        app:layout_constraintBottom_toTopOf="@+id/topGuideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/UARTTextview"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomGuideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/topGuideline">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/importButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/load_profile"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical">
+
+            </LinearLayout>
+
+            <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:columnCount="2"
+
+
+
+                >
+
+
+                <Button
+                    android:id="@+id/exportJsonButton"
+
+                    android:layout_margin="2dp"
+                    android:text="@string/send_json"
+                    android:layout_gravity="fill"
+
+                    />
+
+                <Button
+                    android:id="@+id/exportShortButton"
+
+                    android:layout_width="wrap_content"
+                    android:layout_margin="2dp"
+                    android:text="@string/send_short"
+                    android:layout_gravity="fill"
+                    />
+
+                <Button
+                    android:id="@+id/saveButton"
+                    android:layout_margin="2dp"
+                    android:text="@string/save_eeprom"
+                    android:layout_gravity="fill"
+                    />
+
+                <Button
+                    android:id="@+id/cancelButton"
+
+                    android:layout_width="wrap_content"
+                    android:layout_margin="2dp"
+                    android:text="@string/cancel"
+                    android:layout_gravity="fill"
+
+
+                    />
+            </GridLayout>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bottomGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintGuide_percent="0.95" />
+</androidx.constraintlayout.widget.ConstraintLayout>
