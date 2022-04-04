@@ -18,6 +18,8 @@
        android:layout_height="wrap_content"
        android:id="@+id/textviewKey"
        android:layout_weight="1"
+       android:layout_marginStart="2dp"
+       android:layout_marginEnd="2dp"
        />
 
     <EditText

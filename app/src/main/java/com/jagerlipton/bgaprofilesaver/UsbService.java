@@ -41,9 +41,9 @@ public class UsbService extends Service {
     public static final String ACTION_USB_DEVICE_LIST = "com.jagerlipton.bgaprofilesaver.ACTION_USB_DEVICE_LIST";
     public static final String ACTION_USB_READ_PROFILE = "com.jagerlipton.bgaprofilesaver.ACTION_USB_READ_PROFILE";
 
-    public static final String APP_PREFERENCES = "preferences";
-    public static final String APP_PREFERENCES_BAUDRATE = "baudrate";
-    SharedPreferences mSharedPreferences;
+    private static final String APP_PREFERENCES = "preferences";
+    private static final String APP_PREFERENCES_BAUDRATE = "baudrate";
+    private SharedPreferences mSharedPreferences;
 
 
 

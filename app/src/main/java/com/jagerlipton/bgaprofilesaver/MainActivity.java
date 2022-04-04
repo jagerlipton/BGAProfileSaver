@@ -18,7 +18,6 @@ import android.os.Message;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -38,7 +37,6 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -47,24 +45,19 @@ public class MainActivity extends AppCompatActivity {
     private static TextView mUARTTextview;
     private static Button mImportButton, mExportShortButton, mExportJSONButton, mSaveButton, mCancelButton;
     private static Spinner mSpeedSpinner;
-
     private UsbService usbService;
     private MyHandler mHandler;
     private static LinearLayout mContainer;
     private static List<View> listViews;
-
-    public static final String APP_PREFERENCES = "preferences";
-    public static final String APP_PREFERENCES_BAUDRATE = "baudrate";
-    SharedPreferences mSharedPreferences;
+    private static final String APP_PREFERENCES = "preferences";
+    private static final String APP_PREFERENCES_BAUDRATE = "baudrate";
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
-
         setContentView(R.layout.activity_main);
-
-        mSharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
 
         mHandler = new MyHandler(this);
         mUARTTextview = (TextView) findViewById(R.id.UARTTextview);
@@ -74,10 +67,12 @@ public class MainActivity extends AppCompatActivity {
         mSaveButton = (Button) findViewById(R.id.saveButton);
         mCancelButton = (Button) findViewById(R.id.cancelButton);
         mSpeedSpinner = (Spinner) findViewById(R.id.speedSpinner);
+        mContainer = (LinearLayout) findViewById(R.id.container);
+        listViews = new ArrayList<View>();
 
+        mSharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         if (mSharedPreferences.contains(APP_PREFERENCES_BAUDRATE)) {
             mSpeedSpinner.setSelection(mSharedPreferences.getInt(APP_PREFERENCES_BAUDRATE, 0));
-
         }
 
         mSpeedSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -96,16 +91,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        mContainer = (LinearLayout) findViewById(R.id.container);
-        listViews = new ArrayList<View>();
-
         mImportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String data = "COMMAND_GET_PROFILE";
-                listViews.clear();
-                mContainer.removeAllViews();
-
+                clearLinearLayout();
                 if (usbService != null) { // if UsbService was correctly binded, Send data
                     usbService.write(data.getBytes());
                 }
@@ -123,8 +113,6 @@ public class MainActivity extends AppCompatActivity {
                     data = data.concat(((EditText) listViews.get(i).findViewById(R.id.edittext)).getText().toString());
                     if (i < listViews.size() - 1) data = data.concat(",");
                 }
-                Log.d("ololo", data);
-
                 if (usbService != null) {
                     usbService.write(data.getBytes());
                 }
@@ -147,14 +135,12 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject JSONprofile = new JSONObject();
                     JSONprofile.put(data, profile);
                     data = JSONprofile.toString();
-                    Log.d("ololo", data);
                     if (usbService != null) {
                         usbService.write(data.getBytes());
                     }
                 } catch (JSONException e) {
-                    //some exception handler code.
+                    //
                 }
-
             }
         });
 
@@ -172,21 +158,13 @@ public class MainActivity extends AppCompatActivity {
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                listViews.clear();
-                mContainer.removeAllViews();
-
-                mImportButton.setVisibility(View.VISIBLE);
-                mExportJSONButton.setVisibility(View.GONE);
-                mExportShortButton.setVisibility(View.GONE);
-                mSaveButton.setVisibility(View.GONE);
-                mCancelButton.setVisibility(View.GONE);
-
-
+                clearLinearLayout();
+                invisibleControlButton();
             }
         });
 
         JSONParsing(s, this);
+
 
     }
 
@@ -195,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         setFilters();  // Start listening notifications from UsbService
-        startService(UsbService.class, usbConnection, null); // Start UsbService(if it was not started before) and Bind it
+        startService(UsbService.class, usbConnection, null);
     }
 
     @Override
@@ -232,13 +210,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    /*
-     * This handler will be passed to UsbService. Data received from serial port is displayed through this handler
-     */
-
-    // String s = "{\"browsers\":{\"firefox\":4,\"opera\":5,\"ie\":6}}";
+    String ss = "{\"APPEND\":{\"firefox\":4,\"opera\":5,\"ie\":6}}";
     String s = "{\"PROFILE\":{\"profileSteps\":4,\"Setpoint2\":20,\"min_pwr_TOPStep[1]888787878787878\":10,\"min_pwr_TOPStep[2]\":20,\"min_pwr_TOPStep[3]\":30,\"min_pwr_TOPStep[4]\":40,\"max_pwr_TOPStep[1]\":40,\"max_pwr_TOPStep[2]\":50,\"max_pwr_TOPStep[3]\":60,\"max_pwr_TOPStep[4]\":70,\"rampRateStep[1]\":5,\"rampRateStep[2]\":6,\"rampRateStep[3]\":7,\"rampRateStep[4]\":8,\"temperatureStep[1]\":6,\"temperatureStep[2]\":7,\"temperatureStep[3]\":8,\"temperatureStep[4]\":9,\"dwellTimerStep[1]\":5,\"dwellTimerStep[2]\":5,\"dwellTimerStep[3]\":5,\"dwellTimerStep[4]\":5,\"kp1\":100,\"ki1\":100,\"kd1\":100,\"kp2\":100,\"ki2\":100,\"kd2\":100}}";
+
+   // String ss = "{\"APPEND\":{\"firefox\":4}}";
 
     private static void JSONParsing(String jsonInput, Context context) {
         try {
@@ -246,18 +221,9 @@ public class MainActivity extends AppCompatActivity {
 
             if (jObject.has("PROFILE")) {
 
-                mImportButton.setVisibility(View.GONE);
-                mExportJSONButton.setVisibility(View.VISIBLE);
-                mExportShortButton.setVisibility(View.VISIBLE);
-                mSaveButton.setVisibility(View.VISIBLE);
-                mCancelButton.setVisibility(View.VISIBLE);
-
+                visibleControlButton();
+                clearLinearLayout();
                 JSONObject jsonData = jObject.getJSONObject("PROFILE");
-
-                Iterator<String> keys = jsonData.keys();
-
-                listViews.clear();
-                mContainer.removeAllViews();
 
                 for (int i = 0; i < jsonData.names().length(); i++) {
 
@@ -265,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                     View view = inflater.inflate(R.layout.custom_edittext_layout, null);
 
                     TextView mTextviewIterator = (TextView) view.findViewById(R.id.textviewIterator);
-                    mTextviewIterator.setText(String.valueOf(i+1));
+                    mTextviewIterator.setText(String.valueOf(i + 1));
 
                     TextView mTextviewKey = (TextView) view.findViewById(R.id.textviewKey);
                     String key = jsonData.names().getString(i);
@@ -289,64 +255,126 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
+                    listViews.add(view);
+                    mContainer.addView(view);
+                }
+               }
 
+            if (jObject.has("APPEND")) {
+                visibleControlButton();
+                JSONObject jsonData = jObject.getJSONObject("APPEND");
 
+                Integer counter = listViews.size();
 
+                for (int i = 0; i < jsonData.names().length(); i++) {
+                    counter++;
+
+                    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View view = inflater.inflate(R.layout.custom_edittext_layout, null);
+
+                    TextView mTextviewIterator = (TextView) view.findViewById(R.id.textviewIterator);
+                    mTextviewIterator.setText(String.valueOf(counter));
+
+                    TextView mTextviewKey = (TextView) view.findViewById(R.id.textviewKey);
+                    String key = jsonData.names().getString(i);
+                    mTextviewKey.setText(key);
+
+                    EditText mEdittext = (EditText) view.findViewById(R.id.edittext);
+                    String value = jsonData.get(key).toString();
+                    mEdittext.setText(value);
+                    validationBackgroundTint(mEdittext, context);
+
+                    mEdittext.addTextChangedListener(new TextWatcher() {
+
+                        public void afterTextChanged(Editable s) {
+                            validationBackgroundTint(mEdittext, context);
+                        }
+
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        }
+
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                        }
+                    });
                     listViews.add(view);
                     mContainer.addView(view);
                 }
 
 
             }
-
-
         } catch (JSONException e) {
-            //some exception handler code.
+            // надо бы обработать
         }
 
 
     }
 
-    private static void validationBackgroundTint(EditText edittext, Context context) {
-
-        Resources resources = context.getResources();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && TextUtils.isEmpty(edittext.getText())) {
-            edittext.setBackgroundTintList(resources.getColorStateList(R.color.error, context.getTheme()));
-            disableControlButton ();
-
-        } else if (TextUtils.isEmpty(edittext.getText())){
-            edittext.setBackgroundTintList(resources.getColorStateList(R.color.error));
-            disableControlButton ();
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !TextUtils.isEmpty(edittext.getText())) {
-            edittext.setBackgroundTintList(resources.getColorStateList(R.color.ok, context.getTheme()));
-            enableControlButton ();
-
-        } else if (!TextUtils.isEmpty(edittext.getText())){
-            edittext.setBackgroundTintList(resources.getColorStateList(R.color.ok));
-            enableControlButton ();
-        }
+    private static void clearLinearLayout() {
+        listViews.clear();
+        mContainer.removeAllViews();
     }
 
-    private static void disableControlButton () {
+    private static void disableControlButton() {
         mExportJSONButton.setEnabled(false);
         mExportShortButton.setEnabled(false);
         mSaveButton.setEnabled(false);
     }
 
-    private static void enableControlButton () {
+    private static void enableControlButton() {
         mExportJSONButton.setEnabled(true);
         mExportShortButton.setEnabled(true);
         mSaveButton.setEnabled(true);
     }
 
+    private static void invisibleControlButton() {
+        mExportJSONButton.setVisibility(View.GONE);
+        mExportShortButton.setVisibility(View.GONE);
+        mCancelButton.setVisibility(View.GONE);
+        mSaveButton.setVisibility(View.GONE);
+        mImportButton.setVisibility(View.VISIBLE);
+    }
 
+    private static void visibleControlButton() {
+        mExportJSONButton.setVisibility(View.VISIBLE);
+        mExportShortButton.setVisibility(View.VISIBLE);
+        mCancelButton.setVisibility(View.VISIBLE);
+        mSaveButton.setVisibility(View.VISIBLE);
+        mImportButton.setVisibility(View.GONE);
+    }
+
+
+    private static void validationBackgroundTint(EditText edittext, Context context) {
+        Resources resources = context.getResources();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+
+            if (TextUtils.isEmpty(edittext.getText())) {
+                edittext.setBackgroundTintList(resources.getColorStateList(R.color.error, context.getTheme()));
+                disableControlButton();
+            } else {
+                edittext.setBackgroundTintList(resources.getColorStateList(R.color.ok, context.getTheme()));
+                enableControlButton();
+            }
+
+        } else {
+
+            if (TextUtils.isEmpty(edittext.getText())) {
+                edittext.setBackgroundTintList(resources.getColorStateList(R.color.error));
+                disableControlButton();
+            } else {
+                edittext.setBackgroundTintList(resources.getColorStateList(R.color.ok));
+                enableControlButton();
+            }
+
+        }
+
+    }
 
 
     private static boolean isValidTextEdit(EditText edittext) {
-      return  !TextUtils.isEmpty(edittext.getText());
+        return !TextUtils.isEmpty(edittext.getText());
     }
 
     private static boolean isJSONValid(String jsonInput) {
@@ -360,7 +388,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private static class MyHandler extends Handler {
+
         private final WeakReference<MainActivity> mActivity;
 
         public MyHandler(MainActivity activity) {
@@ -371,24 +401,26 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
-                    String data = (String) msg.obj;
+                    String data = (String) msg.obj;    //получение сообщений из порта
 
-                    if (isJSONValid(data)) {
+                    if (isJSONValid(data)) {  //если валидный JSON
                         JSONParsing(data, mActivity.get());
-
-                        //получение сообщений из порта
-
                     }
-
-                    break;
-                case UsbService.CTS_CHANGE:
-                    Toast.makeText(mActivity.get(), "CTS_CHANGE", Toast.LENGTH_LONG).show();
-                    break;
-                case UsbService.DSR_CHANGE:
-                    Toast.makeText(mActivity.get(), "DSR_CHANGE", Toast.LENGTH_LONG).show();
                     break;
             }
         }
+    }
+
+    private void onConnectControl() {
+        mUARTTextview.setText(R.string.label_connected);
+        mImportButton.setVisibility(View.VISIBLE);
+        mSpeedSpinner.setEnabled(false);
+    }
+
+    private void onDisconnectControl() {
+        mUARTTextview.setText(R.string.label_disconnected);
+        mImportButton.setVisibility(View.GONE);
+        mSpeedSpinner.setEnabled(true);
     }
 
 
@@ -398,34 +430,24 @@ public class MainActivity extends AppCompatActivity {
             switch (intent.getAction()) {
 
                 case UsbService.ACTION_USB_PERMISSION_GRANTED: // USB PERMISSION GRANTED
-
-                    Toast.makeText(context, "USB Ready", Toast.LENGTH_SHORT).show();
-                    mUARTTextview.setText("Connected");
-                    mImportButton.setVisibility(View.VISIBLE);
-                    mSpeedSpinner.setEnabled(false);
+                    Toast.makeText(context, R.string.USBready, Toast.LENGTH_SHORT).show();
+                    onConnectControl();
                     break;
                 case UsbService.ACTION_USB_PERMISSION_NOT_GRANTED: // USB PERMISSION NOT GRANTED
-                    Toast.makeText(context, "USB Permission not granted", Toast.LENGTH_SHORT).show();
-                    mImportButton.setVisibility(View.GONE);
-                    mSpeedSpinner.setEnabled(true);
+                    Toast.makeText(context, R.string.USBnotgranted, Toast.LENGTH_SHORT).show();
+                    onDisconnectControl();
                     break;
                 case UsbService.ACTION_NO_USB: // NO USB CONNECTED
-                    Toast.makeText(context, "No USB connected", Toast.LENGTH_SHORT).show();
-                    mUARTTextview.setText("Disconnected");
-                    mImportButton.setVisibility(View.GONE);
-                    mSpeedSpinner.setEnabled(true);
+                    Toast.makeText(context, R.string.noUSB, Toast.LENGTH_SHORT).show();
+                    onDisconnectControl();
                     break;
                 case UsbService.ACTION_USB_DISCONNECTED: // USB DISCONNECTED
-                    Toast.makeText(context, "USB disconnected", Toast.LENGTH_SHORT).show();
-                    mUARTTextview.setText("Disconnected");
-                    mImportButton.setVisibility(View.GONE);
-                    mSpeedSpinner.setEnabled(true);
+                    Toast.makeText(context, R.string.USBdisconnected, Toast.LENGTH_SHORT).show();
+                    onDisconnectControl();
                     break;
                 case UsbService.ACTION_USB_NOT_SUPPORTED: // USB NOT SUPPORTED
-                    Toast.makeText(context, "USB device not supported", Toast.LENGTH_SHORT).show();
-                    mUARTTextview.setText("Disconnected");
-                    mImportButton.setVisibility(View.GONE);
-                    mSpeedSpinner.setEnabled(true);
+                    Toast.makeText(context, R.string.USBnotsupported, Toast.LENGTH_SHORT).show();
+                    onDisconnectControl();
                     break;
             }
         }

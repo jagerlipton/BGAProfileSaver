@@ -74,6 +74,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="10dp"
                 android:columnCount="2"
+                android:id="@+id/grid"
                 >
 
 

@@ -6,6 +6,13 @@
     <string name="send_json">Send JSON</string>
     <string name="cancel">Cancel</string>
     <string name="send_short">Send Short</string>
+    <string name="label_connected">Connected</string>
+    <string name="label_disconnected">Disconnected</string>
+    <string name="USBready">USB Ready</string>
+    <string name="USBnotgranted">USB Permission not granted</string>
+    <string name="noUSB">No USB connected</string>
+    <string name="USBdisconnected">USB disconnected</string>
+    <string name="USBnotsupported">USB device not supported</string>
 
 
     <string-array name="speed">
