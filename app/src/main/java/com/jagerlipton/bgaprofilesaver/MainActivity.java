@@ -15,7 +15,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -138,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
                     for (int i = 0; i < listViews.size(); i++) {
                         String value = ((EditText) listViews.get(i).findViewById(R.id.edittext)).getText().toString();
-                        String key = ((TextView) listViews.get(i).findViewById(R.id.textview)).getText().toString();
+                        String key = ((TextView) listViews.get(i).findViewById(R.id.textviewKey)).getText().toString();
                         profile.put(key, Integer.valueOf(value));
                     }
 
@@ -236,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
      */
 
     // String s = "{\"browsers\":{\"firefox\":4,\"opera\":5,\"ie\":6}}";
-    String s = "{\"PROFILE\":{\"profileSteps\":4,\"Setpoint2\":20,\"min_pwr_TOPStep[1]\":10,\"min_pwr_TOPStep[2]\":20,\"min_pwr_TOPStep[3]\":30,\"min_pwr_TOPStep[4]\":40,\"max_pwr_TOPStep[1]\":40,\"max_pwr_TOPStep[2]\":50,\"max_pwr_TOPStep[3]\":60,\"max_pwr_TOPStep[4]\":70,\"rampRateStep[1]\":5,\"rampRateStep[2]\":6,\"rampRateStep[3]\":7,\"rampRateStep[4]\":8,\"temperatureStep[1]\":6,\"temperatureStep[2]\":7,\"temperatureStep[3]\":8,\"temperatureStep[4]\":9,\"dwellTimerStep[1]\":5,\"dwellTimerStep[2]\":5,\"dwellTimerStep[3]\":5,\"dwellTimerStep[4]\":5,\"kp1\":100,\"ki1\":100,\"kd1\":100,\"kp2\":100,\"ki2\":100,\"kd2\":100}}";
+    String s = "{\"PROFILE\":{\"profileSteps\":4,\"Setpoint2\":20,\"min_pwr_TOPStep[1]888787878787878\":10,\"min_pwr_TOPStep[2]\":20,\"min_pwr_TOPStep[3]\":30,\"min_pwr_TOPStep[4]\":40,\"max_pwr_TOPStep[1]\":40,\"max_pwr_TOPStep[2]\":50,\"max_pwr_TOPStep[3]\":60,\"max_pwr_TOPStep[4]\":70,\"rampRateStep[1]\":5,\"rampRateStep[2]\":6,\"rampRateStep[3]\":7,\"rampRateStep[4]\":8,\"temperatureStep[1]\":6,\"temperatureStep[2]\":7,\"temperatureStep[3]\":8,\"temperatureStep[4]\":9,\"dwellTimerStep[1]\":5,\"dwellTimerStep[2]\":5,\"dwellTimerStep[3]\":5,\"dwellTimerStep[4]\":5,\"kp1\":100,\"ki1\":100,\"kd1\":100,\"kp2\":100,\"ki2\":100,\"kd2\":100}}";
 
     private static void JSONParsing(String jsonInput, Context context) {
         try {
@@ -262,13 +264,32 @@ public class MainActivity extends AppCompatActivity {
                     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     View view = inflater.inflate(R.layout.custom_edittext_layout, null);
 
-                    TextView tw = (TextView) view.findViewById(R.id.textview);
-                    String key = jsonData.names().getString(i);
-                    tw.setText(key);
+                    TextView mTextviewIterator = (TextView) view.findViewById(R.id.textviewIterator);
+                    mTextviewIterator.setText(String.valueOf(i+1));
 
-                    EditText et = (EditText) view.findViewById(R.id.edittext);
+                    TextView mTextviewKey = (TextView) view.findViewById(R.id.textviewKey);
+                    String key = jsonData.names().getString(i);
+                    mTextviewKey.setText(key);
+
+                    EditText mEdittext = (EditText) view.findViewById(R.id.edittext);
                     String value = jsonData.get(key).toString();
-                    et.setText(value);
+                    mEdittext.setText(value);
+                    validationBackgroundTint(mEdittext, context);
+
+                    mEdittext.addTextChangedListener(new TextWatcher() {
+
+                        public void afterTextChanged(Editable s) {
+                            validationBackgroundTint(mEdittext, context);
+                        }
+
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        }
+
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                        }
+                    });
+
 
 
                     listViews.add(view);
@@ -286,27 +307,47 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private boolean isTextValid(EditText edittext, Context context) {
+    private static void validationBackgroundTint(EditText edittext, Context context) {
 
         Resources resources = context.getResources();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && TextUtils.isEmpty(edittext.getText())) {
             edittext.setBackgroundTintList(resources.getColorStateList(R.color.error, context.getTheme()));
+            disableControlButton ();
 
-        } else {
+        } else if (TextUtils.isEmpty(edittext.getText())){
             edittext.setBackgroundTintList(resources.getColorStateList(R.color.error));
+            disableControlButton ();
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !TextUtils.isEmpty(edittext.getText())) {
             edittext.setBackgroundTintList(resources.getColorStateList(R.color.ok, context.getTheme()));
+            enableControlButton ();
 
-        } else {
+        } else if (!TextUtils.isEmpty(edittext.getText())){
             edittext.setBackgroundTintList(resources.getColorStateList(R.color.ok));
+            enableControlButton ();
         }
-
-        return !TextUtils.isEmpty(edittext.getText());
     }
 
+    private static void disableControlButton () {
+        mExportJSONButton.setEnabled(false);
+        mExportShortButton.setEnabled(false);
+        mSaveButton.setEnabled(false);
+    }
+
+    private static void enableControlButton () {
+        mExportJSONButton.setEnabled(true);
+        mExportShortButton.setEnabled(true);
+        mSaveButton.setEnabled(true);
+    }
+
+
+
+
+    private static boolean isValidTextEdit(EditText edittext) {
+      return  !TextUtils.isEmpty(edittext.getText());
+    }
 
     private static boolean isJSONValid(String jsonInput) {
         Gson gson = new Gson();
