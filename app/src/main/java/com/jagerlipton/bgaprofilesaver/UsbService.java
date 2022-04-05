@@ -38,20 +38,17 @@ public class UsbService extends Service {
     public static final String ACTION_CDC_DRIVER_NOT_WORKING = "com.jagerlipton.bgaprofilesaver.ACTION_CDC_DRIVER_NOT_WORKING";
     public static final String ACTION_USB_DEVICE_NOT_WORKING = "com.jagerlipton.bgaprofilesaver.ACTION_USB_DEVICE_NOT_WORKING";
 
-    public static final String ACTION_USB_DEVICE_LIST = "com.jagerlipton.bgaprofilesaver.ACTION_USB_DEVICE_LIST";
-    public static final String ACTION_USB_READ_PROFILE = "com.jagerlipton.bgaprofilesaver.ACTION_USB_READ_PROFILE";
 
+    public static final String ACTION_SERVICE_CONNECTED = "com.jagerlipton.bgaprofilesaver.ACTION_SERV_CONNECTED";
+    private static final String ACTION_USB_PERMISSION = "com.jagerlipton.bgaprofilesaver.USB_PERMISSION";
     private static final String APP_PREFERENCES = "preferences";
     private static final String APP_PREFERENCES_BAUDRATE = "baudrate";
     private SharedPreferences mSharedPreferences;
 
-
-
-
     public static final int MESSAGE_FROM_SERIAL_PORT = 0;
     public static final int CTS_CHANGE = 1;
     public static final int DSR_CHANGE = 2;
-    private static final String ACTION_USB_PERMISSION = "com.jagerlipton.bgaprofilesaver.USB_PERMISSION";
+
     private static int baudrate = 9600; // default
     public static boolean SERVICE_CONNECTED = false;
 
@@ -204,7 +201,7 @@ public class UsbService extends Service {
             }
         } else {
             Log.d(TAG, "findSerialPortDevice() usbManager returned empty device list." );
-            // There is no USB devices connected. Send an intent to MainActivity
+            // There is no USB devices connected
             Intent intent = new Intent(ACTION_NO_USB);
             sendBroadcast(intent);
         }
@@ -245,7 +242,7 @@ public class UsbService extends Service {
                     mSharedPreferences = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
                     if (mSharedPreferences.contains(APP_PREFERENCES_BAUDRATE)) {
                         String[] choose = getResources().getStringArray(R.array.speed);
-                        baudrate = Integer.valueOf(choose[mSharedPreferences.getInt(APP_PREFERENCES_BAUDRATE, 0)]);
+                        baudrate = Integer.parseInt(choose[mSharedPreferences.getInt(APP_PREFERENCES_BAUDRATE, 0)]);
 
                     }
                     serialPort.setBaudRate(baudrate);
@@ -258,11 +255,10 @@ public class UsbService extends Service {
                     serialPort.getCTS(ctsCallback);
                     serialPort.getDSR(dsrCallback);
                     
-                    Intent intent = new Intent(ACTION_USB_READY);
+                    Intent intent = new Intent(ACTION_SERVICE_CONNECTED);
                     context.sendBroadcast(intent);
                 } else {
-                    // Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit
-                    // Send an Intent to Main Activity
+
                     if (serialPort instanceof CDCSerialDevice) {
                         Intent intent = new Intent(ACTION_CDC_DRIVER_NOT_WORKING);
                         context.sendBroadcast(intent);
@@ -272,7 +268,6 @@ public class UsbService extends Service {
                     }
                 }
             } else {
-                // No driver for given device, even generic CDC driver could not be loaded
                 Intent intent = new Intent(ACTION_USB_NOT_SUPPORTED);
                 context.sendBroadcast(intent);
             }

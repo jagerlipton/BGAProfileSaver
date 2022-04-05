@@ -173,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         setFilters();  // Start listening notifications from UsbService
+
         startService(UsbService.class, usbConnection, null);
     }
 
@@ -201,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setFilters() {
         IntentFilter filter = new IntentFilter();
+        filter.addAction(UsbService.ACTION_SERVICE_CONNECTED);
         filter.addAction(UsbService.ACTION_USB_PERMISSION_GRANTED);
         filter.addAction(UsbService.ACTION_NO_USB);
         filter.addAction(UsbService.ACTION_USB_DISCONNECTED);
@@ -429,9 +431,11 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
 
+                case UsbService.ACTION_SERVICE_CONNECTED: // serialPortConnected
+                    onConnectControl();
+                    break;
                 case UsbService.ACTION_USB_PERMISSION_GRANTED: // USB PERMISSION GRANTED
                     Toast.makeText(context, R.string.USBready, Toast.LENGTH_SHORT).show();
-                    onConnectControl();
                     break;
                 case UsbService.ACTION_USB_PERMISSION_NOT_GRANTED: // USB PERMISSION NOT GRANTED
                     Toast.makeText(context, R.string.USBnotgranted, Toast.LENGTH_SHORT).show();
