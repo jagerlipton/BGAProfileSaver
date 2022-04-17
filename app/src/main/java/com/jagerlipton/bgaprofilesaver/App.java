@@ -2,6 +2,7 @@ package com.jagerlipton.bgaprofilesaver;
 
 import android.app.Application;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
@@ -17,18 +18,42 @@ public class App extends Application {
 
 
 //------------------------------------------------------------------------------------
+   // state Connection
+    private static MutableLiveData<Boolean> portState = new MutableLiveData<>(false);
 
-    private static MutableLiveData<Boolean> portConnected = new MutableLiveData<>(false);
-
-    public static MutableLiveData<Boolean> getPortStatus() {
-        return portConnected;
+    public static MutableLiveData<Boolean> isPortState() {
+        return portState;
     }
 
-    public static void setPortStatus(Boolean status) {
-        App.portConnected.postValue(status);
+    public static void setPortState(Boolean status) {
+        App.portState.postValue(status);
     }
 
 //------------------------------------------------------------------------------------
+    // state  1 - Clear; 2 - wait data; 3 - Fully views
+    private static MutableLiveData<Integer> screenState = new MutableLiveData<Integer>(1);
+
+    public static LiveData<Integer> getScreenState() {
+        return screenState;
+    }
+
+    public static void setScreenState(Integer status) {
+        App.screenState.postValue(status);
+    }
+
+//------------------------------------------------------------------------------------
+    // state Valid/Invalid editTexts
+    private static MutableLiveData<Boolean> validValuesState = new MutableLiveData<>(false);
+
+    public static MutableLiveData<Boolean> isValidValuesState() {
+        return validValuesState;
+    }
+
+    public static void setValidValues(Boolean validValues) {
+        App.validValuesState.postValue(validValues);
+    }
+//------------------------------------------------------------------------------------
+
 
     private static MutableLiveData<Integer> baudrateIndex = new MutableLiveData<>(0);
 
@@ -61,21 +86,15 @@ public class App extends Application {
         inputList.postValue(clearList);
     }
 
-//------------------------------------------------------------------------------------
+    public static void addLines (ArrayList<InputClass> inputList) {
+        inputList.addAll(inputList);
 
-    private static MutableLiveData<Boolean> isValidValues = new MutableLiveData<>(false);
 
-    public static MutableLiveData<Boolean> getValidValues() {
-        return isValidValues;
     }
 
-    public static void setValidValues(Boolean validValues) {
-        App.isValidValues.postValue(validValues);
-    }
-//------------------------------------------------------------------------------------
-
-    public static Boolean isCanceled = false;
 
 //------------------------------------------------------------------------------------
+
+
 
 }

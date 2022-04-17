@@ -36,9 +36,9 @@ public class ListAdapter  extends RecyclerView.Adapter<ListHolder> {
     public void onBindViewHolder(ListHolder holder, int position) {
          holder.mCounter.setText(mInputArrayList.get(position).getId().toString());
          holder.mKey.setText(mInputArrayList.get(position).getKeyName());
-
          holder.mValue.setTag(position);
          holder.mValue.setText(mInputArrayList.get(position).getValueName());
+         //TODO сделать нормальный бинд в холдере, убрать паблики
     }
 
     @Override

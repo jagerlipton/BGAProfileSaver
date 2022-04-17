@@ -57,34 +57,45 @@ public class UsbService extends Service {
     @Override
     public void onCreate() {
         this.context = this;
+
+        Log.d("ololo", "сервис create");
+
         serialPortConnected = false;
-        App.setPortStatus(false);
+        App.setPortState(false);
         UsbService.SERVICE_CONNECTED = true;
         setFilter();
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         findSerialPortDevice();
 
-       // parsingJSON(s);
+
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d("ololo", "сервис destroy");
         serialPort.close();
-        App.setPortStatus(false);
+        App.setPortState(false);
         unregisterReceiver(usbReceiver);
         UsbService.SERVICE_CONNECTED = false;
     }
 
     public class UsbBinder extends Binder {
         public UsbService getService() {
-            return UsbService.this;
+                  return UsbService.this;
         }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d("ololo", "сервис bind");
         return binder;
+          }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d("ololo", "сервис unbind");
+        return super.onUnbind(intent);
     }
 
     @Override
@@ -127,7 +138,7 @@ public class UsbService extends Service {
                     serialPort.close();
                 }
                 serialPortConnected = false;
-                App.setPortStatus(false);
+                App.setPortState(false);
             }
         }
     };
@@ -191,7 +202,7 @@ public class UsbService extends Service {
             if (serialPort != null) {
                 if (serialPort.open()) {
 
-                    App.setPortStatus(true);
+                    App.setPortState(true);
                     baudrate = App.getBaudrate();
 
                     serialPort.setBaudRate(baudrate);
@@ -245,9 +256,9 @@ public class UsbService extends Service {
     }
 
 
-    String ss = "{\"APPEND\":{\"firefox\":4,\"opera\":5,\"ie\":6}}";
+   // String ss = "{\"APPEND\":{\"firefox\":4,\"opera\":5,\"ie\":6}}";
     String s = "{\"PROFILE\":{\"profileSteps\":4,\"Setpoint2\":20,\"min_pwr_TOPStep[1]888787878787878\":10,\"min_pwr_TOPStep[2]\":20,\"min_pwr_TOPStep[3]\":30,\"min_pwr_TOPStep[4]\":40,\"max_pwr_TOPStep[1]\":40,\"max_pwr_TOPStep[2]\":50,\"max_pwr_TOPStep[3]\":60,\"max_pwr_TOPStep[4]\":70,\"rampRateStep[1]\":5,\"rampRateStep[2]\":6,\"rampRateStep[3]\":7,\"rampRateStep[4]\":8,\"temperatureStep[1]\":6,\"temperatureStep[2]\":7,\"temperatureStep[3]\":8,\"temperatureStep[4]\":9,\"dwellTimerStep[1]\":5,\"dwellTimerStep[2]\":5,\"dwellTimerStep[3]\":5,\"dwellTimerStep[4]\":5,\"kp1\":100,\"ki1\":100,\"kd1\":100,\"kp2\":100,\"ki2\":100,\"kd2\":100}}";
-    // String ss = "{\"APPEND\":{\"firefox\":4}}";
+     String ss = "{\"APPEND\":{\"firefox\":4}}";
 
     private void parsingJSON(String jsonInput) {
         try {
@@ -261,7 +272,7 @@ public class UsbService extends Service {
                 nameObject = "PROFILE";
             }
             if (jObject.has("APPEND")) {
-                if (App.inputList.getValue() != null) {
+                if (App.inputList.getValue()!= null) {
                     inputList.addAll(App.inputList.getValue());
                     sizeList = inputList.size();
                 }
@@ -286,6 +297,7 @@ public class UsbService extends Service {
                     inputList.add(input);
                 }
             }
+
             if (inputList.size() > 0) App.inputList.postValue(inputList);
 
         } catch (JSONException e) {

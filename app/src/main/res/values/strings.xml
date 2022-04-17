@@ -13,6 +13,7 @@
     <string name="noUSB">No USB connected</string>
     <string name="USBdisconnected">USB disconnected</string>
     <string name="USBnotsupported">USB device not supported</string>
+    <string name="baudrate">Baudrate:</string>
 
 
     <string-array name="speed">

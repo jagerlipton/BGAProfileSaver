@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private UsbService usbService;
     private static ImageView mImageView;
     private static RecyclerView mRecycler;
+    private static ScrollView mScrollView;
+    private static ProgressBar mProgressBar;
 
     SharedPreferencesHelper mSharedPreferencesHelper;
     @NonNull
@@ -52,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setContentView(R.layout.activity_main);
 
+        Log.d("ololo", "активити create");
+
+        //TODO сделать viewbinding
         mSharedPreferencesHelper = new SharedPreferencesHelper(this);
 
         mUARTTextview = (TextView) findViewById(R.id.UARTTextview);
@@ -62,16 +69,19 @@ public class MainActivity extends AppCompatActivity {
         mCancelButton = (Button) findViewById(R.id.cancelButton);
         mSpeedSpinner = (Spinner) findViewById(R.id.speedSpinner);
         mImageView = (ImageView) findViewById(R.id.bgImageView);
+        mScrollView = (ScrollView) findViewById(R.id.scrollView);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         mRecycler = (RecyclerView) findViewById(R.id.recycler);
         mRecycler.setLayoutManager(new LinearLayoutManager(this));
         mRecycler.setAdapter(mListAdapter);
+
         DividerItemDecoration divider = new DividerItemDecoration(mRecycler.getContext(), DividerItemDecoration.VERTICAL);
         divider.setDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.separator));
         mRecycler.addItemDecoration(divider);
 
-
-        App.getPortStatus().observe(this, new Observer<Boolean>() {
+// TODO сделать отдельный обсервер на старт стоп
+        App.isPortState().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean value) {
                 if (value) onConnectControl();
@@ -79,21 +89,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        App.getScreenState().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+               Log.d("ololo", String.valueOf(integer));
+
+                if (integer==1) onClearState();
+                if (integer==2) onImport();
+                if (integer==3) onFullState();
+            }
+    });
+
+
         App.inputList.observe(this, new Observer<ArrayList<InputClass>>() {
             @Override
             public void onChanged(ArrayList<InputClass> inputClasses) {
-                if (!App.isCanceled) {
+
                     mListAdapter.addData(inputClasses);
-                    visibleControlButton();
-                }
-                if (App.isCanceled) {
-                    mListAdapter.addData(inputClasses);
-                    invisibleControlButton();
-                }
+                   if (App.getScreenState().getValue()==2) App.setScreenState(3);
             }
         });
 
-        App.getValidValues().observe(this, new Observer<Boolean>() {
+        App.isValidValuesState().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean value) {
                 if (value) enableControlButton();
@@ -124,9 +141,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String data = "COMMAND_GET_PROFILE";
+
                 if (usbService != null) {
+                    App.setScreenState(2);
                     usbService.write(data.getBytes());
-                    App.isCanceled=false;
                 }
             }
         });
@@ -138,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
                 String data = List2Short();
                 if (usbService != null) {
                     usbService.write(data.getBytes());
+                    Log.d("ololo",data);
                 }
             }
         });
@@ -166,8 +185,9 @@ public class MainActivity extends AppCompatActivity {
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              App.isCanceled=true;
-              App.clearList();
+                App.setScreenState(1);
+                App.clearList();
+
             }
         });
     }
@@ -177,7 +197,8 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = 0; i < ListAdapter.mInputArrayList.size(); i++) {
             data = data.concat(ListAdapter.mInputArrayList.get(i).getValueName());
-            if (i < ListAdapter.mInputArrayList.size() - 1) data = data.concat(",");
+         //   if (i < ListAdapter.mInputArrayList.size() - 1)
+              data = data.concat(",");
         }
         return data;
     }
@@ -208,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d("ololo", "активити resume");
         setFilters();  // Start listening notifications from UsbService
         startService(UsbService.class, usbConnection, null);
     }
@@ -215,8 +237,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
+        Log.d("ololo", "активити pause");
         unregisterReceiver(mUsbReceiver);
         unbindService(usbConnection);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("ololo", "активити start");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("ololo", "активити stop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("ololo", "активити destroy");
     }
 
     private void startService(Class<?> service, ServiceConnection serviceConnection, Bundle extras) {
@@ -257,40 +298,45 @@ public class MainActivity extends AppCompatActivity {
         mSaveButton.setEnabled(true);
     }
 
-    private static void invisibleControlButton() {
+    private static void onClearState() {
+        mImportButton.setVisibility(View.VISIBLE);
+        mRecycler.setVisibility(View.GONE);
         mExportJSONButton.setVisibility(View.GONE);
         mExportShortButton.setVisibility(View.GONE);
         mCancelButton.setVisibility(View.GONE);
         mSaveButton.setVisibility(View.GONE);
-        mRecycler.setVisibility(View.GONE);
-        mImportButton.setVisibility(View.VISIBLE);
         mImageView.setVisibility(View.VISIBLE);
     }
+    private static void onImport() {
+        mImportButton.setEnabled(false);
+        mProgressBar.setVisibility(View.VISIBLE);
 
-    private static void visibleControlButton() {
+    }
+
+    private static void onFullState() {
+        mImportButton.setEnabled(true);
+        mImportButton.setVisibility(View.GONE);
+        mRecycler.setVisibility(View.VISIBLE);
         mExportJSONButton.setVisibility(View.VISIBLE);
         mExportShortButton.setVisibility(View.VISIBLE);
         mCancelButton.setVisibility(View.VISIBLE);
         mSaveButton.setVisibility(View.VISIBLE);
-        mRecycler.setVisibility(View.VISIBLE);
-        mImportButton.setVisibility(View.GONE);
         mImageView.setVisibility(View.GONE);
-
+        mProgressBar.setVisibility(View.GONE);
     }
-
 
     private void onConnectControl() {
         mUARTTextview.setText(R.string.label_connected);
-        mImportButton.setVisibility(View.VISIBLE);
         mSpeedSpinner.setEnabled(false);
         mImageView.setImageResource(R.drawable.usb_online);
+        mScrollView.setVisibility(View.VISIBLE);
     }
 
     private void onDisconnectControl() {
         mUARTTextview.setText(R.string.label_disconnected);
-        mImportButton.setVisibility(View.GONE);
         mSpeedSpinner.setEnabled(true);
         mImageView.setImageResource(R.drawable.usb_offline);
+        mScrollView.setVisibility(View.GONE);
     }
 
 

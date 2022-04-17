@@ -69,7 +69,7 @@ public class ListHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    public void validationList() {
+    private void validationList() {
         if (ListAdapter.validationSet.isEmpty()) App.setValidValues(true);
         else App.setValidValues(false);
     }
