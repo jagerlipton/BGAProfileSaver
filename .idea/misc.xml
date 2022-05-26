@@ -3,22 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/BGAProfileEditor/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1965" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/BGAProfileEditor/app/src/main/res/drawable/ic_launcher_background.xml" value="0.1965" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/BGAProfileEditor/app/src/main/res/drawable/separator.xml" value="0.1" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/BGAProfileEditor/app/src/main/res/layout/activity_main.xml" value="0.15163934426229508" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/BGAProfileEditor/app/src/main/res/layout/bg.xml" value="0.23020833333333332" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/BGAProfileEditor/app/src/main/res/layout/custom_edittext_layout.xml" value="0.1" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/BGAProfileEditor/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1965" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/BGAProfileEditor/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1965" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/app/src/main/res/drawable/erorr_edittext.xml" value="0.1055" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/app/src/main/res/drawable/ok_edittext.xml" value="0.1055" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/app/src/main/res/layout/activity_main.xml" value="0.22" />
-        <entry key="..\:/AndroidProjects/BGAProfileSaver/app/src/main/res/layout/custom_edittext_layout.xml" value="0.23645833333333333" />
+        <entry key="..\:/AndroidProjects/BGAProfileSaver_Java/app/src/main/res/layout/activity_main.xml" value="0.24739583333333334" />
+        <entry key="..\:/AndroidProjects/BGAProfileSaver_Java/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.187" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_7" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

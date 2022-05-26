@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jagerlipton.bgaprofilesaver">
 
-    <uses-feature android:name="android.hardware.usb.host"
-        android:required="true"/>
-
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="true" />
 
     <application
         android:name=".App"
@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BGAProfileSaver">
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,13 +23,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <service
-            android:name=".UsbService"
-            android:enabled="true">
-        </service>
-
-
+            android:name=".data.service.UsbService"
+            android:enabled="true" />
     </application>
 
 </manifest>
