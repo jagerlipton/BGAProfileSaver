@@ -1,6 +1,7 @@
 package com.jagerlipton.bgaprofilesaver.domain.model;
 
-import java.util.ArrayList;
+
+import java.util.List;
 
 public class CommandModel {
 
@@ -8,12 +9,12 @@ public class CommandModel {
         COMMAND_GET_PROFILE, COMMAND_SAVE_PROFILE, SHORT_PROFILE, JSON_PROFILE
     }
     private Commands command;
-    private ArrayList<ArduinoProfileListDomain> list;
+    private List<ArduinoProfileListDomain> list;
 
     public CommandModel() {
     }
 
-    public CommandModel(Commands command, ArrayList<ArduinoProfileListDomain> list) {
+    public CommandModel(Commands command, List<ArduinoProfileListDomain> list) {
         this.command = command;
         this.list = list;
     }
@@ -26,11 +27,11 @@ public class CommandModel {
         this.command = command;
     }
 
-    public ArrayList<ArduinoProfileListDomain> getList() {
+    public List<ArduinoProfileListDomain> getList() {
         return list;
     }
 
-    public void setList(ArrayList<ArduinoProfileListDomain> list) {
+    public void setList(List<ArduinoProfileListDomain> list) {
         this.list = list;
     }
 }

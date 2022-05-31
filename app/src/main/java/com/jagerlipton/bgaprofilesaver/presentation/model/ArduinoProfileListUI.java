@@ -4,6 +4,7 @@ import com.jagerlipton.bgaprofilesaver.data.repository.model.ArduinoProfileListD
 import com.jagerlipton.bgaprofilesaver.domain.model.ArduinoProfileListDomain;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ArduinoProfileListUI {
     private Integer id;
@@ -14,12 +15,10 @@ public class ArduinoProfileListUI {
         this.id = id;
         this.keyName = keyName;
         this.valueName = valueName;
-
     }
 
     public ArduinoProfileListUI() {
     }
-
 
     public Integer getId() {
         return id;
@@ -45,15 +44,13 @@ public class ArduinoProfileListUI {
         this.valueName = valueName;
     }
 
-
     @Override
     public String toString() {
-        return "{" + keyName + ":"+ valueName + "}";
+        return "{" + keyName + ":" + valueName + "}";
     }
 
-
-   public static ArrayList<ArduinoProfileListUI> mapDataToUI(ArrayList<ArduinoProfileListData> input) {
-        ArrayList<ArduinoProfileListUI> output = new ArrayList<ArduinoProfileListUI>();
+    public static List<ArduinoProfileListUI> mapDataToUI(List<ArduinoProfileListData> input) {
+        List<ArduinoProfileListUI> output = new ArrayList<ArduinoProfileListUI>();
         for (int i = 0; i < input.size(); i++) {
             ArduinoProfileListUI item = new ArduinoProfileListUI(i + 1, input.get(i).getKeyName(), input.get(i).getValueName());
             output.add(item);
@@ -61,14 +58,12 @@ public class ArduinoProfileListUI {
         return output;
     }
 
-    public static ArrayList<ArduinoProfileListDomain> mapUIToDomain(ArrayList<ArduinoProfileListUI> input) {
-        ArrayList<ArduinoProfileListDomain> output = new ArrayList<ArduinoProfileListDomain>();
+    public static List<ArduinoProfileListDomain> mapUIToDomain(List<ArduinoProfileListUI> input) {
+        List<ArduinoProfileListDomain> output = new ArrayList<ArduinoProfileListDomain>();
         for (int i = 0; i < input.size(); i++) {
             ArduinoProfileListDomain item = new ArduinoProfileListDomain(input.get(i).getKeyName(), input.get(i).getValueName());
             output.add(item);
         }
         return output;
     }
-
-
 }

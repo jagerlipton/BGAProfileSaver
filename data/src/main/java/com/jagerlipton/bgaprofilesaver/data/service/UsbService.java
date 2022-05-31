@@ -15,6 +15,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
@@ -22,11 +23,11 @@ import com.jagerlipton.bgaprofilesaver.data.repository.model.ArduinoProfileListD
 import com.jagerlipton.bgaprofilesaver.data.service.JSON.JSONCommand;
 import com.jagerlipton.bgaprofilesaver.data.service.JSON.ParsingJSON;
 import com.jagerlipton.bgaprofilesaver.data.service.model.Connection;
-import com.jagerlipton.bgaprofilesaver.domain.model.CommandModel;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -39,6 +40,7 @@ public class UsbService extends Service {
     public static final int MESSAGE_FROM_SERIAL_PORT = 0;
     public static final int MESSAGE_FROM_SERVICE = 1;
 
+    private static final String DELIMITER = "\n";
     private int baudrate = 9600; // default
 
     private final IBinder binder = new UsbBinder();
@@ -55,23 +57,18 @@ public class UsbService extends Service {
 
     private Messenger messageHandler;
 
-    public boolean sendToServiceManager(int state, Object obj) {
-
+    public void sendToServiceManager(int state, Object obj) {
         if (messageHandler != null) {
             Message message = Message.obtain();
             message.arg1 = state;
             message.obj = obj;
             try {
                 messageHandler.send(message);
-                return true;
-
             } catch (
                     RemoteException e) {
                 e.printStackTrace();
-                return false;
             }
         }
-        return false;
     }
 
     public void setMessageHandler(Messenger messageHandler) {
@@ -88,7 +85,6 @@ public class UsbService extends Service {
             return UsbService.this;
         }
     }
-
     //==============================================================================================
     // Override methods
     @Override
@@ -219,46 +215,43 @@ public class UsbService extends Service {
     }
 
     private void write(byte[] data) {
-        if (serialPort != null)
+        if (serialPort != null) {
             serialPort.write(data);
-    }
-
-    public void writeCommandToPort(String outputString, boolean progressbar) {
-        write(outputString.getBytes());
-        if (progressbar) {
             connState.setProgressbarState(true);
             sendToServiceManager(MESSAGE_FROM_SERVICE, connState);
         }
     }
 
-
+    public void writeCommandToPort(String outputString) {
+        write(outputString.getBytes());
+    }
 
     private UsbSerialInterface.UsbReadCallback mCallback = new UsbSerialInterface.UsbReadCallback() {
         @Override
         public void onReceivedData(byte[] arg0) {
-            connState.setProgressbarState(false);
-            sendToServiceManager(MESSAGE_FROM_SERVICE, connState);
-
-            String data = new String(arg0, StandardCharsets.UTF_8);
-            if (ParsingJSON.isJSONValid(data)) parsing(data);
+                    if (arg0.length != 0) {
+                String data = new String(arg0, StandardCharsets.UTF_8);
+                String[] messages = data.split(DELIMITER);
+                for (String message : messages) {
+                    if (ParsingJSON.isJSONValid(message)) parsing(message);
+                }
+            }
         }
     };
 
-
     private void parsing(String jsonInput) {
-
         if (ParsingJSON.getJSONCommand(jsonInput) == JSONCommand.REPLACE) {
-            ArrayList<ArduinoProfileListData> inputList = new ArrayList<>();
-            inputList = ParsingJSON.JSONToReplaceArrayList(jsonInput);
+            connState.setProgressbarState(false);
+            sendToServiceManager(MESSAGE_FROM_SERVICE, connState);
+            List<ArduinoProfileListData> inputList = ParsingJSON.JSONToReplaceArrayList(jsonInput);;
             assert inputList != null;
             if (inputList.size() > 0) {
                 sendToServiceManager(MESSAGE_FROM_SERIAL_PORT, inputList);
-
             }
         }
+        if (ParsingJSON.getJSONCommand(jsonInput) == JSONCommand.READY){
+                connState.setProgressbarState(false);
+                sendToServiceManager(MESSAGE_FROM_SERVICE, connState);
+       }
     }
-
-
-
-
 }

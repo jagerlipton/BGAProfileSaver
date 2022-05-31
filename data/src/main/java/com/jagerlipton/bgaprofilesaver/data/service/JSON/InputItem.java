@@ -1,10 +1,10 @@
 package com.jagerlipton.bgaprofilesaver.data.service.JSON;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class InputItem {
     public String command;
-    public ArrayList<ArrayItem> array;
+    public List<ArrayItem> array;
 }
 
 

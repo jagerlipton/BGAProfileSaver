@@ -12,7 +12,6 @@ import android.os.Message;
 import android.os.Messenger;
 
 import androidx.annotation.NonNull;
-
 import com.jagerlipton.bgaprofilesaver.data.repository.model.ArduinoProfileListData;
 import com.jagerlipton.bgaprofilesaver.data.service.JSON.ParsingJSON;
 import com.jagerlipton.bgaprofilesaver.data.service.model.Connection;
@@ -21,8 +20,7 @@ import com.jagerlipton.bgaprofilesaver.domain.interfaces.IServiceManager;
 import com.jagerlipton.bgaprofilesaver.domain.model.Baudrate;
 import com.jagerlipton.bgaprofilesaver.domain.model.CommandModel;
 import com.jagerlipton.bgaprofilesaver.domain.model.ConnectionType;
-
-import java.util.ArrayList;
+import java.util.List;
 
 public class ServiceManager implements IServiceManager {
 
@@ -39,15 +37,12 @@ public class ServiceManager implements IServiceManager {
     private UsbService usbService;
     private Boolean isBounded = false;
 
-    //==============================================================================================
-    // reciever from service
-
     Handler mainHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message message) {
             switch (message.arg1) {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
-                    ArrayList<ArduinoProfileListData> data = (ArrayList<ArduinoProfileListData>) message.obj;
+                    List<ArduinoProfileListData> data = (List<ArduinoProfileListData>) message.obj;
                     serviceOutput.setList(data);
                     break;
                 case UsbService.MESSAGE_FROM_SERVICE:
@@ -58,8 +53,6 @@ public class ServiceManager implements IServiceManager {
             return true;
         }
     });
-
-    //==============================================================================================
 
     private final ServiceConnection usbConnection = new ServiceConnection() {
         @Override
@@ -106,23 +99,21 @@ public class ServiceManager implements IServiceManager {
         CommandModel.Commands cmd = command.getCommand();
         switch (cmd) {
             case COMMAND_GET_PROFILE: {
-                usbService.writeCommandToPort("COMMAND_GET_PROFILE", true);
+                usbService.writeCommandToPort(ParsingJSON.commandToJSONString("COMMAND_GET_PROFILE"));
                 break;
             }
             case COMMAND_SAVE_PROFILE: {
-                usbService.writeCommandToPort("COMMAND_SAVE_PROFILE", false);
+                usbService.writeCommandToPort(ParsingJSON.commandToJSONString("COMMAND_SAVE_PROFILE"));
                 break;
             }
             case JSON_PROFILE: {
-                usbService.writeCommandToPort(ParsingJSON.listToJSON(ArduinoProfileListData.mapDomainToData(command.getList())), false);
+                usbService.writeCommandToPort(ParsingJSON.listToJSONString(ArduinoProfileListData.mapDomainToData(command.getList())));
                 break;
             }
             case SHORT_PROFILE: {
-                usbService.writeCommandToPort(ParsingJSON.listToShort(ArduinoProfileListData.mapDomainToData(command.getList())), false);
+                usbService.writeCommandToPort(ParsingJSON.listToString(ArduinoProfileListData.mapDomainToData(command.getList())));
                 break;
             }
         }
     }
 }
-
-

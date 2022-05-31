@@ -2,6 +2,7 @@ package com.jagerlipton.bgaprofilesaver.presentation.ui;
 
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -11,7 +12,6 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
@@ -19,7 +19,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.jagerlipton.bgaprofilesaver.R;
 import com.jagerlipton.bgaprofilesaver.data.repository.model.ArduinoProfileListData;
 import com.jagerlipton.bgaprofilesaver.data.service.IServiceOutputListener;
@@ -29,8 +28,8 @@ import com.jagerlipton.bgaprofilesaver.domain.model.ConnectionType;
 import com.jagerlipton.bgaprofilesaver.presentation.model.ArduinoProfileListUI;
 import com.jagerlipton.bgaprofilesaver.presentation.model.ScreenState;
 import com.jagerlipton.bgaprofilesaver.presentation.util.IValidEditTextListener;
-
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -46,16 +45,12 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ScrollView scrollView;
     private ProgressBar progressBar;
-
-
     private final ListAdapter listAdapter = new ListAdapter();
-
     private MainViewModel mainViewModel;
-
     private Observer<Boolean> portStateObserver;
     private Observer<Boolean> progressbarStateObserver;
     private Observer<ScreenState> screenStateObserver;
-    private Observer<ArrayList<ArduinoProfileListUI>> arrayListObserver;
+    private Observer<List<ArduinoProfileListUI>> arrayListObserver;
     private Observer<Boolean> validValuesEditTextObserver;
     private Observer<String> liveCastObserver;
 
@@ -65,11 +60,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().hide();  // TODO пофиксить
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
         setContentView(R.layout.activity_main);
-
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
-
         uartTextView = (TextView) findViewById(R.id.UARTTextview);
         importButton = (Button) findViewById(R.id.importButton);
         exportJSONButton = (Button) findViewById(R.id.exportJsonButton);
@@ -80,77 +76,57 @@ public class MainActivity extends AppCompatActivity {
         bgImageView = (ImageView) findViewById(R.id.bgImageView);
         scrollView = (ScrollView) findViewById(R.id.scrollView);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(listAdapter);
 
         DividerItemDecoration divider = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
-        divider.setDrawable(ContextCompat.getDrawable(getBaseContext(), R.drawable.separator));  //TODO пофиксить
+        divider.setDrawable(Objects.requireNonNull(ContextCompat.getDrawable(getBaseContext(), R.drawable.separator)));
         recyclerView.addItemDecoration(divider);
 
-        portStateObserver = new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean portState) {
-                if (portState) onConnect();
-                else onDisconnect();
-            }
+        portStateObserver = portState -> {
+            if (portState) onConnect();
+            else onDisconnect();
         };
 
-        progressbarStateObserver = new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean progressState) {
-                if (progressState) progressBar.setVisibility(View.VISIBLE);
-                else progressBar.setVisibility(View.GONE);
-            }
+        progressbarStateObserver = progressState -> {
+            if (progressState) progressBar.setVisibility(View.VISIBLE);
+            else {
+                progressBar.setVisibility(View.GONE);
+                mainViewModel.cancelTimeOut();
+                        }
         };
 
-        screenStateObserver = new Observer<ScreenState>() {
-            @Override
-            public void onChanged(ScreenState screenState) {
-
-                switch (screenState) {
-                    case CLEAR:
-                    case CANCELLED: {
-                        clearState();
-                        break;
-                    }
-                    case WAIT: {
-                        waitState();
-                        break;
-                    }
-                    case RECIEVED: {
-                        recievedState();
-                        break;
-                    }
+        screenStateObserver = screenState -> {
+            switch (screenState) {
+                case CLEAR:
+                case CANCELLED: {
+                    clearState();
+                    break;
+                }
+                case WAIT: {
+                    waitState();
+                    break;
+                }
+                case RECIEVED: {
+                    recievedState();
+                    break;
                 }
             }
         };
 
-        arrayListObserver = new Observer<ArrayList<ArduinoProfileListUI>>() {
-            @Override
-            public void onChanged(ArrayList<ArduinoProfileListUI> input) {
-                listAdapter.addData(input);
-                if (mainViewModel.getScreenState().getValue() != ScreenState.CANCELLED)
-                    mainViewModel.changeScreenState(ScreenState.RECIEVED);
-            }
+        arrayListObserver = input -> {
+            listAdapter.addData(input);
+            if (mainViewModel.getScreenState().getValue() != ScreenState.CANCELLED)
+                mainViewModel.changeScreenState(ScreenState.RECIEVED);
         };
 
-        validValuesEditTextObserver = new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean valid) {
-                if (valid) enableControlButton();
-                if (!valid) disableControlButton();
-            }
+        validValuesEditTextObserver = valid -> {
+            if (valid) enableControlButton();
+            else disableControlButton();
         };
 
-        liveCastObserver = new Observer<String>() {
-            @Override
-            public void onChanged(String castMessage) {
-                showToast(castMessage);
-            }
-        };
-
+        liveCastObserver = this::showToast;
 
         speedSpinner.setSelection(mainViewModel.loadSpinnerValue());
 
@@ -167,46 +143,19 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        importButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainViewModel.importButtonClick();
+        importButton.setOnClickListener(v -> mainViewModel.importButtonClick());
 
-            }
-        });
+        exportShortButton.setOnClickListener(v -> mainViewModel.exportSHORTButtonClick(listAdapter.getInputList()));
 
-        exportShortButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainViewModel.exportSHORTButtonClick(listAdapter.getInputList());
-            }
-        });
+        exportJSONButton.setOnClickListener(v -> mainViewModel.exportJSONButtonClick(listAdapter.getInputList()));
 
-        exportJSONButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainViewModel.exportJSONButtonClick(listAdapter.getInputList());
-            }
-        });
+        saveButton.setOnClickListener(v -> mainViewModel.saveButtonClick());
 
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainViewModel.saveButtonClick();
-            }
-        });
-
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mainViewModel.cancelButtonClick();
-            }
-        });
-
+        cancelButton.setOnClickListener(v -> mainViewModel.cancelButtonClick());
 
         serviceOutput.setListener(new IServiceOutputListener() {
             @Override
-            public void getServiceArrayList(ArrayList<ArduinoProfileListData> list) {
+            public void getServiceArrayList(List<ArduinoProfileListData> list) {
                 mainViewModel.getConnDataList(list);
             }
 
@@ -216,13 +165,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        listAdapter.setValidValuesListener(new IValidEditTextListener() {
-            @Override
-            public void isValid(boolean flag) {
-                mainViewModel.setValidValuesState(flag);
-            }
-        });
-
+        listAdapter.setValidValuesListener(flag -> mainViewModel.setValidValuesState(flag));
     }
 
     private void showToast(final String text) {
@@ -238,8 +181,9 @@ public class MainActivity extends AppCompatActivity {
         mainViewModel.getDataArrayList().observe(this, arrayListObserver);
         mainViewModel.isValidValuesState().observe(this, validValuesEditTextObserver);
         mainViewModel.getLiveCast().observe(this, liveCastObserver);
-
         mainViewModel.startService(ConnectionType.USB);
+
+        Log.d("ololo","Activity resume");
     }
 
     @Override
@@ -265,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
         saveButton.setEnabled(true);
     }
 
-    //-------------------------------------------------------------
     private void clearState() {
         importButton.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
@@ -274,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         cancelButton.setVisibility(View.GONE);
         saveButton.setVisibility(View.GONE);
         bgImageView.setVisibility(View.VISIBLE);
+        importButton.setEnabled(true);
     }
 
     private void waitState() {
@@ -291,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
         bgImageView.setVisibility(View.GONE);
     }
 
-    //-----------------------------------------------------------------
     private void onConnect() {
         uartTextView.setText(R.string.label_connected);
         speedSpinner.setEnabled(false);
@@ -305,5 +248,4 @@ public class MainActivity extends AppCompatActivity {
         bgImageView.setImageResource(R.drawable.usb_offline);
         scrollView.setVisibility(View.GONE);
     }
-
 }

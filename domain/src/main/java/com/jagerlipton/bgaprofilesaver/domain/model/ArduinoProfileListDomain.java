@@ -1,7 +1,5 @@
 package com.jagerlipton.bgaprofilesaver.domain.model;
 
-import java.util.ArrayList;
-
 public class ArduinoProfileListDomain {
     private String keyName;
     private String valueName;

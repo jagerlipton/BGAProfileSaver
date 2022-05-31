@@ -19,6 +19,7 @@ import com.jagerlipton.bgaprofilesaver.presentation.util.IValidEditTextListener;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ListAdapter extends RecyclerView.Adapter<ListHolder> {
@@ -27,7 +28,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListHolder> {
     private final ArrayList<ArduinoProfileListUI> inputArrayList = new ArrayList<>();
     private final Set<Integer> validationSet = new HashSet<>();
 
-    //----------------------------------------------------------------------------------------------
     private IValidEditTextListener validEditTextListener;
 
     public void setValidValuesListener(IValidEditTextListener validEditTextListener) {
@@ -37,7 +37,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListHolder> {
     public void setValidValuesStatus(boolean flag) {
         if (validEditTextListener != null) validEditTextListener.isValid(flag);
     }
-    //----------------------------------------------------------------------------------------------
 
     private final ICommandToAdapter commandToAdapterImpl = new ICommandToAdapter() {
         @Override
@@ -51,7 +50,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListHolder> {
         @Override
         public void validationBackgroundTint(EditText edittext, Context context) {
             Resources resources = context.getResources();
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (TextUtils.isEmpty(edittext.getText())) {
                     edittext.setBackgroundTintList(resources.getColorStateList(R.color.error, context.getTheme()));
@@ -78,11 +76,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListHolder> {
         }
     };
 
-    //----------------------------------------------------------------------------------------------
-
     public ListAdapter() {
     }
-
 
     @NonNull
     @Override
@@ -91,7 +86,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListHolder> {
         View view = inflater.inflate(R.layout.custom_edittext_layout, parent, false);
         return new ListHolder(view, commandToAdapterImpl);
     }
-
 
     @Override
     public void onBindViewHolder(ListHolder holder, int position) {
@@ -103,7 +97,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListHolder> {
         return inputArrayList.size();
     }
 
-    public void addData(ArrayList<ArduinoProfileListUI> data) {
+    public void addData(List<ArduinoProfileListUI> data) {
         inputArrayList.clear();
         inputArrayList.addAll(data);
         notifyDataSetChanged();
@@ -122,5 +116,4 @@ public class ListAdapter extends RecyclerView.Adapter<ListHolder> {
     public ArrayList<ArduinoProfileListUI> getInputList() {
         return inputArrayList;
     }
-
 }

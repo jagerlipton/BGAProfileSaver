@@ -5,6 +5,7 @@ import com.jagerlipton.bgaprofilesaver.data.repository.model.ArduinoProfileListD
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ParsingJSON {
 
@@ -18,11 +19,11 @@ public class ParsingJSON {
         }
     }
 
-    public static ArrayList<ArduinoProfileListData> JSONToReplaceArrayList(String jsonString) {
+    public static List<ArduinoProfileListData> JSONToReplaceArrayList(String jsonString) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             InputItem json = mapper.readValue(jsonString, InputItem.class);
-            ArrayList<ArrayItem> array = new ArrayList<>();
+            List<ArrayItem> array = new ArrayList<>();
             array = json.array;
             if (array != null) {
                 return InputDataToInputItemMapper(array);
@@ -33,9 +34,8 @@ public class ParsingJSON {
         return null;
     }
 
-    public static ArrayList<ArduinoProfileListData> InputDataToInputItemMapper(ArrayList<ArrayItem> data) {
-        ArrayList<ArduinoProfileListData> arrayListInputData = new ArrayList<>();
-
+    public static List<ArduinoProfileListData> InputDataToInputItemMapper(List<ArrayItem> data) {
+        List<ArduinoProfileListData> arrayListInputData = new ArrayList<>();
         for (ArrayItem arrayitem : data) {
             ArduinoProfileListData inputData = new ArduinoProfileListData();
             inputData.setKeyName(arrayitem.key);
@@ -47,14 +47,16 @@ public class ParsingJSON {
 
     public static JSONCommand getJSONCommand(String jsonString) {
         ObjectMapper mapper = new ObjectMapper();
-
         try {
             InputItem json = mapper.readValue(jsonString, InputItem.class);
 
             switch (json.command) {
-                case "REPLACE": return JSONCommand.REPLACE;
-                case "CLEAR": return JSONCommand.CLEAR;
-                case "OK": return JSONCommand.OK;
+                case "REPLACE":
+                    return JSONCommand.REPLACE;
+                case "CLEAR":
+                    return JSONCommand.CLEAR;
+                case "READY":
+                    return JSONCommand.READY;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,8 +64,7 @@ public class ParsingJSON {
         return JSONCommand.NOPE;
     }
 
-    //------------------------------------------------------------------------------------
-    public static String listToShort(ArrayList<ArduinoProfileListData> inputList) {
+    public static String listToString(List<ArduinoProfileListData> inputList) {
         String data = "SHORT_PROFILE:";
         for (int i = 0; i < inputList.size(); i++) {
             data = data.concat(inputList.get(i).getValueName());
@@ -72,7 +73,7 @@ public class ParsingJSON {
         return data;
     }
 
-    public static String listToJSON(ArrayList<ArduinoProfileListData> inputList) {
+    public static String listToJSONString(List<ArduinoProfileListData> inputList) {
         String data = "";
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -81,12 +82,23 @@ public class ParsingJSON {
             output.command = "JSON_PROFILE";
             String jsonString = mapper.writeValueAsString(output);
             if (jsonString != null) data = jsonString;
-
         } catch (IOException e) {
             e.printStackTrace();
         }
         return data;
     }
 
-
+    public static String commandToJSONString(String inputString) {
+        String data = "";
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            OutputItem output = new OutputItem();
+            output.command = inputString;
+             String jsonString = mapper.writeValueAsString(output);
+            if (jsonString != null) data = jsonString;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
 }
