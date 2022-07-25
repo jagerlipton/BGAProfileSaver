@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/AndroidProjects/BGAProfileSaver/app/src/main/res/layout/activity_main.xml" value="0.18" />
+        <entry key="..\:/AndroidProjects/BGAProfileSaver/app/src/main/res/layout/custom_edittext_layout.xml" value="0.1408274132887589" />
         <entry key="..\:/AndroidProjects/BGAProfileSaver_Java/app/src/main/res/layout/activity_main.xml" value="0.24739583333333334" />
         <entry key="..\:/AndroidProjects/BGAProfileSaver_Java/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.187" />
       </map>
